@@ -1,35 +1,26 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Positions } from "./components/Positions.tsx";
+import styles from "./App.module.scss";
+import { Top2000Handler, Top2000Provider } from "./components/Context.tsx";
+import { Filters } from "./components/Filters.tsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const top2000 = Top2000Handler();
+
+  const { selectedYear } = top2000;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Top2000Provider value={top2000}>
+      <article className={styles.container}>
+        <header>
+          <h1>Top 2000 van {selectedYear}</h1>
+          <Filters />
+        </header>
+        <section>
+          <Positions height={100} />
+        </section>
+      </article>
+    </Top2000Provider>
+  );
 }
 
-export default App
+export default App;
