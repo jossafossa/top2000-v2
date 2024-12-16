@@ -1,4 +1,15 @@
-@import "@/assets/mixins.scss";
+$breakpoints: (
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+);
+
+@mixin breakpoint($point) {
+  @media screen and (min-width: map-get($breakpoints, $point)) {
+    @content;
+  }
+}
 
 .select {
   height: 24px;

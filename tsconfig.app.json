@@ -26,6 +26,6 @@
 
   // alias
   "paths": {
-    "@/*": ["./src/*"]
+    "@assets/*": ["./src/assets/*"],
   }
 }
