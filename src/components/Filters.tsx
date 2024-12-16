@@ -3,6 +3,7 @@ import { useTop2000 } from "./Context";
 import { Sorter } from "./Sorter";
 import styles from "./Filters.module.scss";
 import { Track } from "../store";
+import { Select } from "./Select";
 
 export const Filters = () => {
   const {
@@ -36,9 +37,9 @@ export const Filters = () => {
   return (
     <>
       <div className={styles.list}>
-        <label>
+        <label className={styles.select}>
           Year
-          <select
+          <Select
             onChange={(event) => setSelectedYear(Number(event.target.value))}
           >
             {years.map((year) => (
@@ -50,12 +51,12 @@ export const Filters = () => {
                 {year}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
 
-        <label>
+        <label className={styles.select}>
           Compare with
-          <select onChange={(event) => setCompare(Number(event.target.value))}>
+          <Select onChange={(event) => setCompare(Number(event.target.value))}>
             {selectedYear && <option defaultValue="previous">previous</option>}
             {years.map(
               (year) =>
@@ -65,7 +66,7 @@ export const Filters = () => {
                   </option>
                 )
             )}
-          </select>
+          </Select>
         </label>
       </div>
 

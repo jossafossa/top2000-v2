@@ -27,7 +27,10 @@ export const Sorter = ({ name, label, onChange, active }: SorterProps) => {
       />
       <Label active={active}>
         {label}
-        {active && (order ? "▼" : "▲")}
+
+        <span className={styles.icon}>
+          {active && (order ? "▼" : "▲")}
+        </span>
       </Label>
     </label>
   );

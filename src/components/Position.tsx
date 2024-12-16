@@ -1,17 +1,18 @@
+import { memo } from "react";
 import { Track } from "../store";
 import { Label } from "./Label";
 import styles from "./Position.module.scss";
 
 type PositionProps = Track;
 
-export const Position = ({
+export const Position = memo( function Position({
   title,
   artist,
   image,
   change,
   isNew,
   id,
-}: PositionProps) => {
+}: PositionProps) {
   let style = "neutral";
   if (change > 0) style = "positive";
   if (change < 0) style = "negative";
@@ -42,4 +43,4 @@ export const Position = ({
       </footer>
     </article>
   );
-};
+});

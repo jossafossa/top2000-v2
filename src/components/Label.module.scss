@@ -1,10 +1,13 @@
+@import "@/assets/mixins.scss";
+
 .label {
   --background: var(--primary);
   --color: var(--white);
-  --width: 70px;
+  --width: 48px;
   background-color: var(--background);
   color: var(--color);
-  padding: 0.5rem 1rem;
+  padding-inline: 0.5rem;
+  height: 24px;
   border-radius: 0.25rem;
   font-weight: bold;
   min-width: var(--width);
@@ -13,6 +16,10 @@
   align-items: center;
   justify-content: center;
   font-size: 80%;
+
+  @include breakpoint(sm) {
+    height: 32px;
+  }
 }
 
 .neutral {

@@ -1,18 +1,25 @@
 :root {
+  color-scheme: light dark;
+
   --primary: #4e94ec;
   --white: white;
   --dark-white: #e7eff4;
-  --black: black;
-  --light-black: rgb(60, 60, 60);
+  --black: rgb(24, 24, 27);
+  --light-black: rgb(37, 45, 63);
   --blue: #6e8ac5;
   --positive: #4cbb8d;
   --negative: #d6366a;
+
+  --background: light-dark(var(--white), var(--black));
+  --foreground: light-dark(var(--dark-white), var(--light-black));
+  --color: light-dark(var(--black), var(--white));
 }
 
 body {
   margin: 0;
   padding: 0;
   font-family: "Quicksand", sans-serif;
+  background-color: var(--background);
 }
 
 *,

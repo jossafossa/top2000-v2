@@ -1,5 +1,18 @@
+$breakpoints: (
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+);
+
+@mixin breakpoint($point) {
+  @media screen and (min-width: map-get($breakpoints, $point)) {
+    @content;
+  }
+}
+
 .track {
-  --background: var(--dark-white);
+  --background: var(--foreground);
   --outer-height: 86px;
   --gap: 8px;
   --height: calc(var(--outer-height) - var(--gap));
@@ -7,22 +20,25 @@
   --number-width: 35px;
   --number-padding: 1rem;
   --number-offset: calc(var(--number-width) + var(--number-padding));
+  --gap: 0.5rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--gap);
   height: var(--height);
   padding: var(--padding);
   background-color: var(--background);
   border-radius: 0.75rem;
-  /* margin-left: var(--number-offset); */
   position: relative;
   margin-bottom: 8px;
+  @include breakpoint(sm) {
+    --gap: 1rem;
+  }
 
   > header {
     height: 100%;
     display: flex;
     align-items: Center;
-    gap: 1rem;
+    gap: var(--gap);
 
     > span {
       opacity: 0.5;
@@ -60,11 +76,7 @@
   > footer {
     display: flex;
     align-items: center;
-    gap: 1rem;
-
-    & > span {
-      height: calc(var(--height) - var(--padding) * 4);
-    }
+    gap: var(--gap);
 
     padding-right: calc(var(--padding));
   }
