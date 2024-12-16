@@ -5,13 +5,14 @@ import styles from "./Position.module.scss";
 
 type PositionProps = Track;
 
-export const Position = memo( function Position({
+export const Position = memo(function Position({
   title,
   artist,
   image,
   change,
   isNew,
   id,
+  position,
 }: PositionProps) {
   let style = "neutral";
   if (change > 0) style = "positive";
@@ -22,25 +23,31 @@ export const Position = memo( function Position({
   if (change < 0) changeLabel = `${change}`;
 
   return (
-    <article className={styles.track} title={id}>
-      <header>
-        <picture>
-          <img src={image} />
-        </picture>
-      </header>
+    <div className={styles.container}>
+      <span className={styles.position}>
+        <strong>{position}</strong>
+      </span>
 
-      <section>
-        <h2>{title}</h2>
+      <article className={styles.track} title={id}>
+        <header>
+          <picture>
+            <img src={image} />
+          </picture>
+        </header>
 
-        <h3>{artist}</h3>
-      </section>
+        <section>
+          <h2>{title}</h2>
 
-      <footer>
-        {isNew ? <Label>new</Label> : null}
-        <Label style={style as "positive" | "negative" | "neutral"}>
-          {changeLabel}
-        </Label>
-      </footer>
-    </article>
+          <h3>{artist}</h3>
+        </section>
+
+        <footer>
+          {isNew ? <Label>new</Label> : null}
+          <Label style={style as "positive" | "negative" | "neutral"}>
+            {changeLabel}
+          </Label>
+        </footer>
+      </article>
+    </div>
   );
 });

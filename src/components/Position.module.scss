@@ -1,13 +1,24 @@
-$breakpoints: (
-  sm: 576px,
-  md: 768px,
-  lg: 992px,
-  xl: 1200px,
-);
+@use "@assets/mixins" as *;
 
-@mixin breakpoint($point) {
-  @media screen and (min-width: map-get($breakpoints, $point)) {
-    @content;
+.container {
+  --position-width: 32px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  @include breakpoint(sm) {
+    --position-width: 48px;
+  }
+}
+
+.position {
+  opacity: 0.5;
+  text-align: right;
+  font-size: 80%;
+  width: var(--position-width);
+
+  @include breakpoint(sm) {
+    font-size: 100%;
   }
 }
 
@@ -30,6 +41,18 @@ $breakpoints: (
   border-radius: 0.75rem;
   position: relative;
   margin-bottom: 8px;
+  animation: 0.2s fadeIn ease forwards;
+  flex: 1;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   @include breakpoint(sm) {
     --gap: 1rem;
   }

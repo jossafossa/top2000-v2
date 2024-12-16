@@ -1,15 +1,4 @@
-$breakpoints: (
-  sm: 576px,
-  md: 768px,
-  lg: 992px,
-  xl: 1200px,
-);
-
-@mixin breakpoint($point) {
-  @media screen and (min-width: map-get($breakpoints, $point)) {
-    @content;
-  }
-}
+@use "@assets/mixins" as *;
 
 .label {
   --background: var(--primary);
@@ -17,9 +6,9 @@ $breakpoints: (
   --width: 48px;
   background-color: var(--background);
   color: var(--color);
-  padding-inline: 0.5rem;
+  padding-inline: 8px;
   height: 24px;
-  border-radius: 0.25rem;
+  border-radius: 4px;
   font-weight: bold;
   min-width: var(--width);
   text-align: center;
@@ -27,6 +16,7 @@ $breakpoints: (
   align-items: center;
   justify-content: center;
   font-size: 80%;
+  gap: 4px;
 
   @include breakpoint(sm) {
     height: 32px;

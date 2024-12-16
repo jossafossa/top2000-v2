@@ -65,22 +65,29 @@ export const Positions = ({ height }: PositionsProps) => {
   const sorted = sort(positions, sortType, sortDirection);
 
   return (
-    <div className={styles.scroll} ref={scrollRef}>
+    <div className={styles.container}>
       <div className={classNames(styles.loader, isLoading && styles.active)}>
         <Spinner />
       </div>
-      {sorted.map((position, index) => (
+      <div className={styles.scroll} ref={scrollRef}>
         <div
-          className={styles.track}
-          key={`${position.id}-${index}`}
-          style={{ height }}
+          className={styles.inner}
+          style={{ height: positions.length * height }}
         >
-          <span className={styles.position}>
-            <strong>{position.position}</strong>
-          </span>
-          {inView(index) && <Position {...position} />}
+          {sorted.map(
+            (position, index) =>
+              inView(index) && (
+                <div
+                  className={styles.track}
+                  key={`${position.id}-${index}`}
+                  style={{ top: `${index * height}px` }}
+                >
+                  <Position {...position} />
+                </div>
+              )
+          )}
         </div>
-      ))}
+      </div>
     </div>
   );
 };
