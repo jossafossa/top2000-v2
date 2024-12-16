@@ -2,13 +2,32 @@ import { useEffect, useRef, useState } from "react";
 import { Position } from "./Position";
 import styles from "./Positions.module.scss";
 import { useTop2000 } from "./Context";
+import { Track } from "../store";
+import { Spinner } from "./Spinner";
+import classNames from "classnames";
 
 type PositionsProps = {
   height: number;
 };
 
+const sort = (positions: Track[], type: keyof Track, direction: boolean) => {
+  return [...positions].sort((a, b) => {
+    if (a[type] === undefined || b[type] === undefined) {
+      return 0;
+    }
+
+    if (a[type] > b[type]) {
+      return direction ? 1 : -1;
+    }
+    if (a[type] < b[type]) {
+      return direction ? -1 : 1;
+    }
+    return 0;
+  });
+};
+
 export const Positions = ({ height }: PositionsProps) => {
-  const { positions } = useTop2000();
+  const { positions, isLoading, sortDirection, sortType } = useTop2000();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
 
@@ -43,11 +62,23 @@ export const Positions = ({ height }: PositionsProps) => {
     );
   };
 
+  const sorted = sort(positions, sortType, sortDirection);
+
   return (
     <div className={styles.scroll} ref={scrollRef}>
-      {positions.map((position) => (
-        <div className={styles.position} key={position.id} style={{ height }}>
-          {inView(position.position) && <Position {...position} />}
+      <div className={classNames(styles.loader, isLoading && styles.active)}>
+        <Spinner />
+      </div>
+      {sorted.map((position, index) => (
+        <div
+          className={styles.track}
+          key={`${position.id}-${index}`}
+          style={{ height }}
+        >
+          <span className={styles.position}>
+            <strong>{position.position}</strong>
+          </span>
+          {inView(index) && <Position {...position} />}
         </div>
       ))}
     </div>

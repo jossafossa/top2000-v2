@@ -1,32 +1,44 @@
 import { Track } from "../store";
+import { Label } from "./Label";
 import styles from "./Position.module.scss";
 
 type PositionProps = Track;
 
 export const Position = ({
-  position,
   title,
   artist,
   image,
   change,
+  isNew,
+  id,
 }: PositionProps) => {
+  let style = "neutral";
+  if (change > 0) style = "positive";
+  if (change < 0) style = "negative";
+
+  let changeLabel = "-";
+  if (change > 0) changeLabel = `+${change}`;
+  if (change < 0) changeLabel = `${change}`;
+
   return (
-    <article className={styles.position}>
+    <article className={styles.track} title={id}>
       <header>
-        <img
-          className={styles.image}
-          src={image}
-          alt={`${title} - ${artist} `}
-        />
+        <picture>
+          <img src={image} />
+        </picture>
       </header>
+
       <section>
-        <h2>
-          {position}. {title}
-        </h2>
-        <p>{artist}</p>
+        <h2>{title}</h2>
+
+        <h3>{artist}</h3>
       </section>
+
       <footer>
-        {change !== undefined && <p>{change > 0 ? `+${change}` : change}</p>}
+        {isNew ? <Label>new</Label> : null}
+        <Label style={style as "positive" | "negative" | "neutral"}>
+          {changeLabel}
+        </Label>
       </footer>
     </article>
   );

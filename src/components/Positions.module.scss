@@ -1,8 +1,37 @@
 .scroll {
   overflow-y: auto;
   height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  position: relative;
+}
+
+.track {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
 }
 
 .position {
-  overflow: hidden;
+  padding: 16px;
+  opacity: 0.5;
+}
+
+.loader {
+  position: absolute;
+  background-color: rgba(white, 0.8);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: 0.25s ease;
+  z-index: 3;
+
+  &.active {
+    opacity: 1;
+  }
 }

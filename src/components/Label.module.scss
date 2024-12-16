@@ -1,0 +1,28 @@
+.label {
+  --background: var(--primary);
+  --color: var(--white);
+  --width: 70px;
+  background-color: var(--background);
+  color: var(--color);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  min-width: var(--width);
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80%;
+}
+
+.neutral {
+  --background: var(--blue);
+}
+
+.positive {
+  --background: var(--positive);
+}
+
+.negative {
+  --background: var(--negative);
+}

@@ -16,7 +16,7 @@ function App() {
           <Filters />
         </header>
         <section>
-          <Positions height={100} />
+          <Positions height={86} />
         </section>
       </article>
     </Top2000Provider>

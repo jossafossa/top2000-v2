@@ -8,7 +8,10 @@ export type Track = {
   title: string;
   image: string;
   position: number;
-  change?: number;
+  change: number;
+  isNew: boolean;
+  apiPrefPosition?: number;
+  prefPosition?: number;
 };
 
 type ApiYear = {
@@ -55,17 +58,47 @@ const downSize = (inputUrl: string, width: number, height: number) => {
 };
 
 const slugify = (input: string) => {
-  return input
+  input = input.toLowerCase();
+
+  // remove  à etc
+  input = input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  const empty = [
+    "and",
+    "the",
+    "de",
+    "en",
+    "&",
+    "n'",
+    "ng",
+    "pts",
+    "part",
+    "sta",
+    "ster",
+    "'m",
+    "'em",
+  ];
+  for (const word of empty) {
+    const regex = new RegExp(word, "gi");
+    input = input.replace(regex, "");
+  }
+
+  input = input
     .toLowerCase()
-    .replace(/ /g, "-")
-    .replace(/['"()`]/g, "");
+    .replaceAll(/\(.*\)/g, "")
+    .replaceAll(/['"()`,/.!?]/g, "")
+    .replaceAll(/\s/g, "");
+
+  // sort letters alphabetically
+  input = input.split("").sort().join("");
+  return input;
 };
 
 const getId = (position: ApiYear) => {
   const {
     track: { artist, title },
   } = position;
-  return `${slugify(artist)}-${slugify(title)}`;
+  return `${slugify(title)}${slugify(artist)}`;
 };
 
 const transformResponse = (response: ApiResponse): Track[] => {
@@ -73,12 +106,15 @@ const transformResponse = (response: ApiResponse): Track[] => {
     const coverURL =
       position.track?.coverUrl ??
       "https://www.nporadio2.nl/images/unknown_track_m.webp";
-    const id = position.track.id ?? getId(position);
+    const id = getId(position);
     return {
       artist: position.track.artist,
       title: position.track.title,
       image: downSize(coverURL, 200, 200),
       position: position.position.current,
+      apiPrefPosition: position.position.previous,
+      change: 0,
+      isNew: false,
       id,
     };
   });
