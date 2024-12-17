@@ -1,5 +1,11 @@
+@use "@assets/mixins" as *;
+
 .label {
   border-radius: 4px;
+
+  @include focus {
+    @include focus-border;
+  }
 }
 
 .input {

@@ -32,18 +32,28 @@ export const Filters = () => {
   return (
     <>
       <div className={styles.list}>
-        <label>
+        <label className={styles.label}>
           <span>Show filters</span>
-          <input
+          <Input
             type="checkbox"
             onChange={({ target }) => setActive(target.checked)}
             checked={active}
           />
         </label>
       </div>
+
       <div className={classNames(styles.filters, active && styles.active)}>
+        <table className={styles.table}>
+          {Object.entries(stats).map(([key, value]) => (
+            <tr key={key}>
+              <td>{key}</td>
+              <td>{value}</td>
+            </tr>
+          ))}
+        </table>
+
         <div className={styles.list}>
-          <label className={styles.select}>
+          <label className={styles.label}>
             Year
             <Select
               onChange={(event) => setSelectedYear(Number(event.target.value))}
@@ -60,7 +70,7 @@ export const Filters = () => {
             </Select>
           </label>
 
-          <label className={styles.select}>
+          <label className={styles.label}>
             /
             <Select
               onChange={(event) => setCompareYear(Number(event.target.value))}
@@ -78,26 +88,19 @@ export const Filters = () => {
               )}
             </Select>
           </label>
+
+          <label className={styles.label}>
+            <Input
+              type="search"
+              onChange={({ target }) => setSearchQuery(target.value)}
+              value={searchQuery}
+              placeholder="Search"
+            />
+            {searchQuery && positions && `${positions.length} results`}
+          </label>
         </div>
 
-        <div className={styles.list}>
-          <Input
-            type="search"
-            onChange={({ target }) => setSearchQuery(target.value)}
-            value={searchQuery}
-            placeholder="Search"
-          />
-          {searchQuery && positions && `${positions.length} results`}
-        </div>
-
-        <table>
-          {Object.entries(stats).map(([key, value]) => (
-            <tr key={key}>
-              <td>{key}</td>
-              <td>{value}</td>
-            </tr>
-          ))}
-        </table>
+        <hr className={styles.line} />
 
         <div className={styles.list}>
           <span>Sort by</span>

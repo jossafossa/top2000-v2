@@ -47,8 +47,7 @@ h1 {
   font-weight: 700;
 }
 
-:focus-visible,
-label:has(:focus-visible) {
+:focus-visible {
   outline: 2px solid var(--color);
   outline-offset: 3px;
 }

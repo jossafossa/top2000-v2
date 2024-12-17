@@ -12,3 +12,15 @@ $breakpoints: (
     @content;
   }
 }
+
+@mixin focus {
+  &:focus-visible,
+  &:focus-within {
+    @content;
+  }
+}
+
+@mixin focus-border {
+  outline: 2px solid var(--color);
+  outline-offset: 3px;
+}

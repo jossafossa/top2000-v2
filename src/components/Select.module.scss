@@ -10,4 +10,8 @@
   @include breakpoint(sm) {
     height: 32px;
   }
+
+  @include focus {
+    @include focus-border;
+  }
 }
