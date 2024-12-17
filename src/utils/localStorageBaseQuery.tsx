@@ -37,8 +37,6 @@ export const localStorageBaseQuery = ({
       ?.replaceAll(api.endpoint, "")
       .replaceAll(/[()]*/g, "");
 
-    console.log({ args, api, extraOptions });
-
     // If a custom cacheGet function is defined, use it
     if (cacheGet) {
       const cachedData = cacheGet({ url, params });

@@ -8,7 +8,7 @@ type PositionContext = {
   comparePositions?: Track[];
   setComparePositions: (positions: Track[]) => void;
   years: number[];
-  selectedYear?: number;
+  selectedYear?: number | "all";
   setSelectedYear: (year: number) => void;
   compareYear?: number | "previous";
   setCompareYear: (year: number | "previous") => void;
@@ -84,7 +84,6 @@ const search = (positions: Track[], searchQuery: string) => {
     const matchTitle = simplify(position.title).includes(query);
     const matchArtist = simplify(position.artist).includes(query);
     if (matchTitle || matchArtist)
-      console.log(position, simplify(position.artist));
     return matchTitle || matchArtist;
   });
 };
@@ -96,8 +95,9 @@ export const Top2000Handler = (): PositionContext => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const [selectedYear, setSelectedYear] = useState<number>(years[0]);
-  const { data: positionsResult, isFetching: isPositionsLoading } =
-    useGetYearQuery(selectedYear);
+
+  const singleYearQuery = selectedYear === -1 ? skipToken : selectedYear;  
+  const { data: positionsResult, isFetching: isPositionsLoading } = useGetYearQuery(singleYearQuery);
   const [positions, setPositions] = useState<Track[]>([]);
 
   const [compareYear, setCompareYear] = useState<number | "previous">(
@@ -125,9 +125,10 @@ export const Top2000Handler = (): PositionContext => {
     averageChange: Math.floor(
       searched.map((position) => position.change).reduce((a, b) => a + b, 0) /
         searched.length
-    ),
-    amountOfSongs: searched.length,
+    ) || 0,
+    amountOfSongs: searched.length || 0,
   };
+  
 
   const all = {
     positions: searched,

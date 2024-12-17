@@ -44,25 +44,29 @@ export const Filters = () => {
 
       <div className={classNames(styles.filters, active && styles.active)}>
         <table className={styles.table}>
-          {Object.entries(stats).map(([key, value]) => (
-            <tr key={key}>
-              <td>{key}</td>
-              <td>{value}</td>
-            </tr>
-          ))}
+          <tbody>
+            {Object.entries(stats).map(([key, value]) => (
+              <tr key={key}>
+                <td>{key}</td>
+                <td>{value}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
 
         <div className={styles.list}>
           <label className={styles.label}>
             Year
             <Select
-              onChange={(event) => setSelectedYear(Number(event.target.value))}
+              onChange={({target}) => setSelectedYear(Number(target.value))}
+              value={selectedYear}
             >
+                  
+              {/* <option value="-1">All</option> */}
               {years.map((year) => (
                 <option
                   key={year}
-                  defaultValue={year}
-                  selected={year === selectedYear}
+                  value={String(year)}
                 >
                   {year}
                 </option>
@@ -74,6 +78,7 @@ export const Filters = () => {
             /
             <Select
               onChange={(event) => setCompareYear(Number(event.target.value))}
+              value={selectedYear}
             >
               {selectedYear && (
                 <option defaultValue="previous">previous</option>
