@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Track, useGetYearQuery } from "../store";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 type PositionContext = {
   positions?: Track[];
@@ -13,6 +14,8 @@ type PositionContext = {
   setCompareYear: (year: number | "previous") => void;
   setSortType: (type: keyof Track) => void;
   setSortDirection: (direction: boolean) => void;
+  setSearchQuery: (query: string) => void;
+  searchQuery: string;
   sortType: keyof Track;
   sortDirection: boolean;
   isLoading: boolean;
@@ -25,37 +28,32 @@ const getYears = (start: number, end: number) => {
   ).reverse();
 };
 
-const addRelativePositions = (positions: Track[], comparePositions: Track[]) =>
-  positions.map((position) => {
-    const comparePosition = comparePositions.find(
-      (comparePosition) => comparePosition.id === position.id
+const addRelativePositions = (tracks: Track[], compareTracks: Track[]) => {
+  const compareToPrevious = compareTracks.length === 0;
+  return tracks.map((track) => {
+    const compareTrack = compareTracks.find(
+      (comparePosition) => comparePosition.id === track.id
     );
+    const { position, apiPrefPosition } = track;
+    const previousPosition = compareToPrevious
+      ? apiPrefPosition || 2000
+      : compareTrack?.position ?? 2000;
 
-    if (
-      comparePosition?.position &&
-      position.apiPrefPosition &&
-      position.apiPrefPosition !== comparePosition?.position
-    ) {
-      console.log({
-        comparePosition,
-        position,
-      });
-    }
+    const change = previousPosition - position;
 
     return {
-      ...position,
-      change: comparePosition
-        ? comparePosition.position - position.position
-        : positions.length - position.position,
-      isNew: !comparePosition,
-      prefPosition: comparePosition?.position,
+      ...track,
+      change,
+      isNew: previousPosition === 2000,
     };
   });
+};
 
 export const Top2000Handler = (): PositionContext => {
   const years = getYears(2000, new Date().getFullYear());
   const [sortType, setSortType] = useState<keyof Track>("position");
   const [sortDirection, setSortDirection] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const [selectedYear, setSelectedYear] = useState<number>(years[0]);
   const { data: positionsResult, isFetching: isPositionsLoading } =
@@ -68,7 +66,7 @@ export const Top2000Handler = (): PositionContext => {
   const {
     data: comparePositionsResult,
     isFetching: isComparePositionsLoading,
-  } = useGetYearQuery(compareYear === "previous" ? years[1] : compareYear);
+  } = useGetYearQuery(compareYear === "previous" ? skipToken : compareYear);
   const [comparePositions, setComparePositions] = useState<Track[]>([]);
 
   useEffect(() => {
@@ -95,6 +93,8 @@ export const Top2000Handler = (): PositionContext => {
     setSortDirection,
     sortType,
     sortDirection,
+    searchQuery,
+    setSearchQuery,
   };
 
   return all;
@@ -115,6 +115,8 @@ const Context = createContext<PositionContext>({
   sortType: "position",
   sortDirection: true,
   isLoading: false,
+  searchQuery: "",
+  setSearchQuery: () => {},
 });
 
 export const Top2000Provider = Context.Provider;

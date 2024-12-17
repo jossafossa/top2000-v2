@@ -10,8 +10,6 @@
   max-width: 800px;
   margin: auto;
 
-  gap: 1rem;
-
   @include breakpoint(sm) {
     padding: 1rem;
   }

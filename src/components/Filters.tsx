@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { useTop2000 } from "./Context";
 import { Sorter } from "./Sorter";
 import styles from "./Filters.module.scss";
 import { Track } from "../store";
 import { Select } from "./Select";
+import { Input } from "./Input";
 
 export const Filters = () => {
   const {
@@ -14,25 +14,14 @@ export const Filters = () => {
     setSortType,
     sortType,
     setSortDirection,
+    searchQuery,
+    setSearchQuery,
   } = useTop2000();
 
-  const [compare, setCompare] = useState<number | "previous">("previous");
   const setSort = (type: keyof Track, direction: boolean) => {
     setSortType(type);
     setSortDirection(direction);
   };
-
-  useEffect(() => {
-    console.log({
-      selectedYear,
-      compare,
-    });
-    if (compare === "previous" && selectedYear) {
-      setCompareYear(selectedYear - 1);
-    } else {
-      setCompareYear(compare);
-    }
-  }, [selectedYear, compare, setCompareYear]);
 
   return (
     <>
@@ -55,8 +44,10 @@ export const Filters = () => {
         </label>
 
         <label className={styles.select}>
-          Compare with
-          <Select onChange={(event) => setCompare(Number(event.target.value))}>
+          /
+          <Select
+            onChange={(event) => setCompareYear(Number(event.target.value))}
+          >
             {selectedYear && <option defaultValue="previous">previous</option>}
             {years.map(
               (year) =>
@@ -68,6 +59,13 @@ export const Filters = () => {
             )}
           </Select>
         </label>
+
+        <Input
+          type="search"
+          onChange={({ target }) => setSearchQuery(target.value)}
+          value={searchQuery}
+          placeholder="Search"
+        />
       </div>
 
       <div className={styles.list}>

@@ -18,7 +18,7 @@ export const Sorter = ({ name, label, onChange, active }: SorterProps) => {
   };
 
   return (
-    <label>
+    <label className={styles.label}>
       <input
         className={styles.input}
         type="checkbox"
@@ -28,9 +28,7 @@ export const Sorter = ({ name, label, onChange, active }: SorterProps) => {
       <Label active={active}>
         {label}
 
-        <span className={styles.icon}>
-          {active && (order ? "▼" : "▲")}
-        </span>
+        <span className={styles.icon}>{active && (order ? "▼" : "▲")}</span>
       </Label>
     </label>
   );

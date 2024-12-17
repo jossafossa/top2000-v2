@@ -1,6 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { configureStore } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
+import { fetchBaseQuery, setupListeners } from "@reduxjs/toolkit/query";
+// import { localStorageBaseQuery } from "./utils/localStorageBaseQuery";
+// import { compressTracks, decompressTracks } from "./utils/compressTracks";
+import { getTrackId } from "./utils/getTrackId";
 
 export type Track = {
   id: string;
@@ -10,11 +13,11 @@ export type Track = {
   position: number;
   change: number;
   isNew: boolean;
-  apiPrefPosition?: number;
-  prefPosition?: number;
+  apiPrefPosition: number;
+  positions?: number[];
 };
 
-type ApiYear = {
+export type ApiTrack = {
   id?: string;
   broadcastTime: string;
   broadcastUnixTime: number;
@@ -45,7 +48,7 @@ type ApiResponse = {
     pdfUrl: string;
   };
   slug: string;
-  positions: ApiYear[];
+  positions: ApiTrack[];
 };
 
 const downSize = (inputUrl: string, width: number, height: number) => {
@@ -57,56 +60,12 @@ const downSize = (inputUrl: string, width: number, height: number) => {
   return `${url.origin}${url.pathname}?${params.toString()}`;
 };
 
-const slugify = (input: string) => {
-  input = input.toLowerCase();
-
-  // remove  à etc
-  input = input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-  const empty = [
-    "and",
-    "the",
-    "de",
-    "en",
-    "&",
-    "n'",
-    "ng",
-    "pts",
-    "part",
-    "sta",
-    "ster",
-    "'m",
-    "'em",
-  ];
-  for (const word of empty) {
-    const regex = new RegExp(word, "gi");
-    input = input.replace(regex, "");
-  }
-
-  input = input
-    .toLowerCase()
-    .replaceAll(/\(.*\)/g, "")
-    .replaceAll(/['"()`,/.!?]/g, "")
-    .replaceAll(/\s/g, "");
-
-  // sort letters alphabetically
-  input = input.split("").sort().join("");
-  return input;
-};
-
-const getId = (position: ApiYear) => {
-  const {
-    track: { artist, title },
-  } = position;
-  return `${slugify(title)}${slugify(artist)}`;
-};
-
 const transformResponse = (response: ApiResponse): Track[] => {
   return response.positions.map((position) => {
     const coverURL =
       position.track?.coverUrl ??
       "https://www.nporadio2.nl/images/unknown_track_m.webp";
-    const id = getId(position);
+    const id = getTrackId(position);
     return {
       artist: position.track.artist,
       title: position.track.title,
@@ -120,11 +79,50 @@ const transformResponse = (response: ApiResponse): Track[] => {
   });
 };
 
+// const cacheGet = (key: string) => {
+//   const data = window.localStorage.getItem(key);
+//   return data ? JSON.parse(data) : [];
+// };
+
+// const cacheSet = (key: string, data: Track[]) => {
+//   window.localStorage.setItem(key, JSON.stringify(data));
+// };
+
 // Define a service using a base URL and expected endpoints
 export const top2000 = createApi({
   reducerPath: "top2000",
   baseQuery: fetchBaseQuery({
     baseUrl: "https://www.nporadio2.nl/api/charts/",
+    // cacheSet: ({
+    //   data,
+    //   url,
+    //   params,
+    // }: {
+    //   data: ApiResponse;
+    //   url: string;
+    //   params: string;
+    // }) => {
+    //   const tracks = cacheGet("getYear");
+    //   const years = decompressTracks(tracks);
+    //   years[params] = data.positions;
+
+    //   console.log(years);
+    //   const compressed = compressTracks(years);
+
+    //   console.log("setting cache", { params, years, compressed });
+    //   cacheSet("getYear", compressed);
+    // },
+    // cacheGet: ({ url, params }: { url: string; params: string }) => {
+    //   const tracks = cacheGet("getYear");
+
+    //   const years = decompressTracks(tracks);
+
+    //   console.log(years);
+
+    //   if (years[params]) {
+    //     return { positions: years[params] };
+    //   }
+    // },
   }),
   endpoints: (builder) => ({
     getYear: builder.query<Track[], number>({
