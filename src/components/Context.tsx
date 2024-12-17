@@ -19,6 +19,9 @@ type PositionContext = {
   sortType: keyof Track;
   sortDirection: boolean;
   isLoading: boolean;
+  stats: {
+    averageChange?: number;
+  };
 };
 
 const getYears = (start: number, end: number) => {
@@ -46,6 +49,43 @@ const addRelativePositions = (tracks: Track[], compareTracks: Track[]) => {
       change,
       isNew: previousPosition === 2000,
     };
+  });
+};
+
+const sort = (positions: Track[], type: keyof Track, direction: boolean) => {
+  if (type === "change") direction = !direction;
+
+  return [...positions].sort((a, b) => {
+    if (a[type] === undefined || b[type] === undefined) {
+      return 0;
+    }
+
+    if (a[type] > b[type]) {
+      return direction ? 1 : -1;
+    }
+    if (a[type] < b[type]) {
+      return direction ? -1 : 1;
+    }
+    return 0;
+  });
+};
+
+const search = (positions: Track[], searchQuery: string) => {
+  const simplify = (text: string) =>
+    text
+      .toLowerCase() // Convert to lowercase
+      .normalize("NFD") // Decompose characters (e.g., "ø" -> "o\u0308")
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritic marks
+      .replace(/[ø]/g, "o") // Replace special characters
+      .replaceAll(/\s/g, ""); // remove whitespace
+
+  return positions.filter((position) => {
+    const query = simplify(searchQuery);
+    const matchTitle = simplify(position.title).includes(query);
+    const matchArtist = simplify(position.artist).includes(query);
+    if (matchTitle || matchArtist)
+      console.log(position, simplify(position.artist));
+    return matchTitle || matchArtist;
   });
 };
 
@@ -78,8 +118,19 @@ export const Top2000Handler = (): PositionContext => {
     if (comparePositionsResult) setComparePositions(comparePositionsResult);
   }, [comparePositionsResult]);
 
+  const sorted = sort(positions, sortType, sortDirection);
+  const searched = search(sorted, searchQuery);
+
+  const stats = {
+    averageChange: Math.floor(
+      searched.map((position) => position.change).reduce((a, b) => a + b, 0) /
+        searched.length
+    ),
+    amountOfSongs: searched.length,
+  };
+
   const all = {
-    positions,
+    positions: searched,
     setPositions,
     comparePositions,
     setComparePositions,
@@ -95,6 +146,7 @@ export const Top2000Handler = (): PositionContext => {
     sortDirection,
     searchQuery,
     setSearchQuery,
+    stats,
   };
 
   return all;
@@ -117,6 +169,7 @@ const Context = createContext<PositionContext>({
   isLoading: false,
   searchQuery: "",
   setSearchQuery: () => {},
+  stats: {},
 });
 
 export const Top2000Provider = Context.Provider;

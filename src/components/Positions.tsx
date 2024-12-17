@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Position } from "./Position";
 import styles from "./Positions.module.scss";
 import { useTop2000 } from "./Context";
-import { Track } from "../store";
 import { Spinner } from "./Spinner";
 import classNames from "classnames";
 
@@ -10,36 +9,8 @@ type PositionsProps = {
   height: number;
 };
 
-const sort = (positions: Track[], type: keyof Track, direction: boolean) => {
-  if (type === "change") direction = !direction;
-
-  return [...positions].sort((a, b) => {
-    if (a[type] === undefined || b[type] === undefined) {
-      return 0;
-    }
-
-    if (a[type] > b[type]) {
-      return direction ? 1 : -1;
-    }
-    if (a[type] < b[type]) {
-      return direction ? -1 : 1;
-    }
-    return 0;
-  });
-};
-
-const search = (positions: Track[], searchQuery: string) => {
-  return positions.filter((position) => {
-    const query = searchQuery.toLowerCase();
-    const matchTitle = position.title.toLowerCase().includes(query);
-    const matchArtist = position.artist.toLowerCase().includes(query);
-    return matchTitle || matchArtist;
-  });
-};
-
 export const Positions = ({ height }: PositionsProps) => {
-  const { positions, isLoading, sortDirection, sortType, searchQuery } =
-    useTop2000();
+  const { positions, isLoading } = useTop2000();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
 
@@ -74,9 +45,6 @@ export const Positions = ({ height }: PositionsProps) => {
     );
   };
 
-  const sorted = sort(positions, sortType, sortDirection);
-  const searched = search(sorted, searchQuery);
-
   return (
     <div className={styles.container}>
       <div className={classNames(styles.loader, isLoading && styles.active)}>
@@ -87,7 +55,7 @@ export const Positions = ({ height }: PositionsProps) => {
           className={styles.inner}
           style={{ height: positions.length * height }}
         >
-          {searched.map(
+          {positions.map(
             (position, index) =>
               inView(index) && (
                 <div

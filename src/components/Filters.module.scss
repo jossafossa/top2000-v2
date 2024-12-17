@@ -1,7 +1,18 @@
+.filters {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.active {
+  display: flex;
+}
+
 .list {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .select {
