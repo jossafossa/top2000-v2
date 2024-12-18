@@ -1,22 +1,23 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { Track, useGetYearQuery } from "../store";
+import { Track, useGetCombinedYearsQuery, useGetYearQuery } from "../store";
 import { skipToken } from "@reduxjs/toolkit/query";
+import { useQueryParam, BooleanParam, StringParam } from "use-query-params";
 
 type PositionContext = {
   positions?: Track[];
   setPositions: (positions: Track[]) => void;
   comparePositions?: Track[];
   setComparePositions: (positions: Track[]) => void;
-  years: number[];
-  selectedYear?: number | "all";
-  setSelectedYear: (year: number) => void;
-  compareYear?: number | "previous";
-  setCompareYear: (year: number | "previous") => void;
+  years: string[];
+  selectedYear?: string | "all";
+  setSelectedYear: (year: string) => void;
+  compareYear?: string | "previous";
+  setCompareYear: (year: string | "previous") => void;
   setSortType: (type: keyof Track) => void;
   setSortDirection: (direction: boolean) => void;
   setSearchQuery: (query: string) => void;
   searchQuery: string;
-  sortType: keyof Track;
+  sortType: string;
   sortDirection: boolean;
   isLoading: boolean;
   stats: {
@@ -25,9 +26,8 @@ type PositionContext = {
 };
 
 const getYears = (start: number, end: number) => {
-  return Array.from(
-    { length: end - start + 1 },
-    (_, index) => start + index
+  return Array.from({ length: end - start + 1 }, (_, index) =>
+    String(start + index)
   ).reverse();
 };
 
@@ -39,15 +39,15 @@ const addRelativePositions = (tracks: Track[], compareTracks: Track[]) => {
     );
     const { position, apiPrefPosition } = track;
     const previousPosition = compareToPrevious
-      ? apiPrefPosition || 2000
-      : compareTrack?.position ?? 2000;
+      ? apiPrefPosition || tracks.length
+      : compareTrack?.position ?? tracks.length;
 
     const change = previousPosition - position;
 
     return {
       ...track,
       change,
-      isNew: previousPosition === 2000,
+      isNew: previousPosition === tracks.length,
     };
   });
 };
@@ -83,59 +83,90 @@ const search = (positions: Track[], searchQuery: string) => {
     const query = simplify(searchQuery);
     const matchTitle = simplify(position.title).includes(query);
     const matchArtist = simplify(position.artist).includes(query);
-    if (matchTitle || matchArtist)
-    return matchTitle || matchArtist;
+    if (matchTitle || matchArtist) return matchTitle || matchArtist;
   });
 };
 
 export const Top2000Handler = (): PositionContext => {
-  const years = getYears(2000, new Date().getFullYear());
-  const [sortType, setSortType] = useState<keyof Track>("position");
-  const [sortDirection, setSortDirection] = useState<boolean>(true);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
-  const [selectedYear, setSelectedYear] = useState<number>(years[0]);
-
-  const singleYearQuery = selectedYear === -1 ? skipToken : selectedYear;  
-  const { data: positionsResult, isFetching: isPositionsLoading } = useGetYearQuery(singleYearQuery);
+  const years = getYears(1999, new Date().getFullYear());
   const [positions, setPositions] = useState<Track[]>([]);
 
-  const [compareYear, setCompareYear] = useState<number | "previous">(
-    "previous"
-  );
+  const [_selectedYear, setSelectedYear] = useQueryParam("year", StringParam);
+  const selectedYear = _selectedYear ?? years[0];
+
+  // fetch year
+  const fetchAll = selectedYear === "all";
+  const singleYearQuery = fetchAll ? skipToken : selectedYear;
+  const { data: singlePositionsResult, isFetching: isSinglePositionsLoading } =
+    useGetYearQuery(singleYearQuery ?? skipToken);
+
+  // fetch all
+  const allYearsQuery = fetchAll ? years : skipToken;
+  const { data: allPositionsResult, isFetching: isallPositionsLoading } =
+    useGetCombinedYearsQuery(allYearsQuery ?? skipToken);
+  const positionsResult = fetchAll ? allPositionsResult : singlePositionsResult;
+  const isPositionsLoading = fetchAll
+    ? isallPositionsLoading
+    : isSinglePositionsLoading;
+
+  // fetch compare year
+  const [_compareYear, setCompareYear] = useQueryParam("previous", StringParam);
+  const compareYear = _compareYear ?? "previous";
   const {
     data: comparePositionsResult,
     isFetching: isComparePositionsLoading,
-  } = useGetYearQuery(compareYear === "previous" ? skipToken : compareYear);
+  } = useGetYearQuery(
+    compareYear === "previous" ? skipToken : compareYear ?? skipToken
+  );
   const [comparePositions, setComparePositions] = useState<Track[]>([]);
 
+  // add relative positions
   useEffect(() => {
-    if (positionsResult)
-      setPositions(addRelativePositions(positionsResult, comparePositions));
-  }, [positionsResult, comparePositions]);
+    if (positionsResult) {
+      setPositions(
+        addRelativePositions(positionsResult, comparePositionsResult ?? [])
+      );
+    }
+  }, [comparePositionsResult, positionsResult]);
 
-  useEffect(() => {
-    if (comparePositionsResult) setComparePositions(comparePositionsResult);
-  }, [comparePositionsResult]);
+  // sorting
+  const [_sortDirection, setSortDirection] = useQueryParam(
+    "direction",
+    BooleanParam
+  );
+  const sortDirection = _sortDirection ?? true;
 
-  const sorted = sort(positions, sortType, sortDirection);
-  const searched = search(sorted, searchQuery);
+  const [_sortType, setSortType] = useQueryParam("position", StringParam);
+  const sortType = _sortType ?? "position";
 
+  const sorted = sort(
+    positions,
+    sortType as keyof Track,
+    sortDirection ?? true
+  );
+
+  //searching
+  const [_searchQuery, setSearchQuery] = useQueryParam("s", StringParam);
+  const searchQuery = _searchQuery ?? "";
+
+  const searched = search(sorted, searchQuery ?? "");
+
+  //stats
   const stats = {
-    averageChange: Math.floor(
-      searched.map((position) => position.change).reduce((a, b) => a + b, 0) /
-        searched.length
-    ) || 0,
+    averageChange:
+      Math.floor(
+        searched.map((position) => position.change).reduce((a, b) => a + b, 0) /
+          searched.length
+      ) || 0,
     amountOfSongs: searched.length || 0,
   };
-  
 
   const all = {
     positions: searched,
     setPositions,
     comparePositions,
     setComparePositions,
-    years: getYears(2000, new Date().getFullYear()),
+    years,
     selectedYear,
     setSelectedYear,
     compareYear,

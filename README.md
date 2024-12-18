@@ -7,8 +7,8 @@ pnpm install
 pnpm run dev
 ```
 
-## TODO:
-- combine all years into one giant list
+## TODO
+
 - save filters in queryparams
 - move filters to offcanvas
 - play preview

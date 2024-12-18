@@ -29,11 +29,11 @@ const slugify = (input: string) => {
   input = input
     .toLowerCase()
     .replaceAll(/\(.*\)/g, "")
-    .replaceAll(/['"()`,/.!?]/g, "")
-    .replaceAll(/\s/g, "");
+    .replaceAll(/[^a-z]/g, "");
 
   // sort letters alphabetically
   input = input.split("").sort().join("");
+
   return input;
 };
 

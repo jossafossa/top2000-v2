@@ -6,13 +6,17 @@ import { Filters } from "./components/Filters.tsx";
 function App() {
   const top2000 = Top2000Handler();
 
-  const { selectedYear } = top2000;
+  const { selectedYear, positions } = top2000;
+
+  const yearTitle = selectedYear === "all" ? "all years" : selectedYear;
 
   return (
     <Top2000Provider value={top2000}>
       <article className={styles.container}>
         <header>
-          <h1>Top 2000 van {selectedYear}</h1>
+          <h1>
+            Top {positions?.length} from {yearTitle}
+          </h1>
           <Filters />
         </header>
         <section>

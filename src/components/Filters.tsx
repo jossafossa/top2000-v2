@@ -13,6 +13,7 @@ export const Filters = () => {
     years,
     selectedYear,
     setCompareYear,
+    compareYear,
     setSelectedYear,
     setSortType,
     sortType,
@@ -58,27 +59,23 @@ export const Filters = () => {
           <label className={styles.label}>
             Year
             <Select
-              onChange={({target}) => setSelectedYear(Number(target.value))}
+              onChange={({ target }) => setSelectedYear(target.value)}
               value={selectedYear}
             >
-                  
-              {/* <option value="-1">All</option> */}
               {years.map((year) => (
-                <option
-                  key={year}
-                  value={String(year)}
-                >
+                <option key={year} value={String(year)}>
                   {year}
                 </option>
               ))}
+              <option value="all">All</option>
             </Select>
           </label>
 
           <label className={styles.label}>
             /
             <Select
-              onChange={(event) => setCompareYear(Number(event.target.value))}
-              value={selectedYear}
+              onChange={({ target }) => setCompareYear(target.value)}
+              value={compareYear}
             >
               {selectedYear && (
                 <option defaultValue="previous">previous</option>
