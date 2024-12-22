@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Track } from "../store";
+import { type Track } from "../assets/Top2000Api";
 import { Label } from "./Label";
 import styles from "./Position.module.scss";
 

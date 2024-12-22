@@ -9,7 +9,6 @@ pnpm run dev
 
 ## TODO
 
-- save filters in queryparams
 - move filters to offcanvas
 - play preview
 - currently playing

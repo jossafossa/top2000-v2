@@ -1,4 +1,4 @@
-import { ApiTrack } from "../store";
+import { ApiTrack } from "../assets/Top2000Api";
 
 const slugify = (input: string) => {
   input = input.toLowerCase();

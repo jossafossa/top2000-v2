@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { Position } from "./Position";
-import styles from "./Positions.module.scss";
-import { useTop2000 } from "./Context";
-import { Spinner } from "./Spinner";
+import styles from "./LazyScroller.module.scss";
 import classNames from "classnames";
+import { Spinner } from "./Spinner";
 
-type PositionsProps = {
+export function LazyScroller<T>({
+  height,
+  items,
+  isLoading,
+  renderItem,
+}: {
   height: number;
-};
-
-export const Positions = ({ height }: PositionsProps) => {
-  const { positions, isLoading } = useTop2000();
+  items: T[];
+  isLoading: boolean;
+  renderItem: (item: T, index: number) => React.ReactNode;
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
 
@@ -26,7 +29,7 @@ export const Positions = ({ height }: PositionsProps) => {
     };
   }, []);
 
-  if (!positions) {
+  if (!items) {
     return null;
   }
 
@@ -51,19 +54,16 @@ export const Positions = ({ height }: PositionsProps) => {
         <Spinner />
       </div>
       <div className={styles.scroll} ref={scrollRef}>
-        <div
-          className={styles.inner}
-          style={{ height: positions.length * height }}
-        >
-          {positions.map(
-            (position, index) =>
+        <div className={styles.inner} style={{ height: items.length * height }}>
+          {items.map(
+            (item, index) =>
               inView(index) && (
                 <div
                   className={styles.track}
-                  key={`${position.id}-${index}`}
+                  key={index}
                   style={{ top: `${index * height}px` }}
                 >
-                  <Position {...position} />
+                  {renderItem(item, index)}
                 </div>
               )
           )}
@@ -71,4 +71,4 @@ export const Positions = ({ height }: PositionsProps) => {
       </div>
     </div>
   );
-};
+}

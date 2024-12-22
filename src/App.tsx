@@ -1,7 +1,7 @@
-import { Positions } from "./components/Positions.tsx";
 import styles from "./App.module.scss";
 import { Top2000Handler, Top2000Provider } from "./components/Context.tsx";
 import { Filters } from "./components/Filters.tsx";
+import { List } from "./components/List.tsx";
 
 function App() {
   const top2000 = Top2000Handler();
@@ -17,10 +17,12 @@ function App() {
           <h1>
             Top {positions?.length} from {yearTitle}
           </h1>
+
           <Filters />
         </header>
+
         <section>
-          <Positions height={86} />
+          <List />
         </section>
       </article>
     </Top2000Provider>

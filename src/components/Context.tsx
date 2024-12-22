@@ -1,7 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { Track, useGetCombinedYearsQuery, useGetYearQuery } from "../store";
+import { useGetSongsQuery, useGetYearQuery } from "../store";
+import { EnhancedTrack, Track } from "../assets/Top2000Api";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useQueryParam, BooleanParam, StringParam } from "use-query-params";
+
+export type ListType = "years" | "songs";
 
 type PositionContext = {
   positions?: Track[];
@@ -13,16 +16,23 @@ type PositionContext = {
   setSelectedYear: (year: string) => void;
   compareYear?: string | "previous";
   setCompareYear: (year: string | "previous") => void;
-  setSortType: (type: keyof Track) => void;
+  setSortType: (type) => void;
   setSortDirection: (direction: boolean) => void;
   setSearchQuery: (query: string) => void;
   searchQuery: string;
   sortType: string;
   sortDirection: boolean;
   isLoading: boolean;
-  stats: {
+  listType: ListType;
+  setListType: (type: ListType) => void;
+  positionsStats: {
     averageChange?: number;
   };
+  songsStats: {
+    averageChange?: number;
+  };
+  songs?: EnhancedTrack[];
+  isSongsLoading: boolean;
 };
 
 const getYears = (start: number, end: number) => {
@@ -31,16 +41,16 @@ const getYears = (start: number, end: number) => {
   ).reverse();
 };
 
-const addRelativePositions = (tracks: Track[], compareTracks: Track[]) => {
-  const compareToPrevious = compareTracks.length === 0;
+const addRelativePositions = (tracks: Track[], comparePositions: Track[]) => {
+  const compareToPrevious = comparePositions.length === 0;
   return tracks.map((track) => {
-    const compareTrack = compareTracks.find(
+    const comparePosition = comparePositions.find(
       (comparePosition) => comparePosition.id === track.id
     );
     const { position, apiPrefPosition } = track;
     const previousPosition = compareToPrevious
       ? apiPrefPosition || tracks.length
-      : compareTrack?.position ?? tracks.length;
+      : comparePosition?.position ?? tracks.length;
 
     const change = previousPosition - position;
 
@@ -52,7 +62,7 @@ const addRelativePositions = (tracks: Track[], compareTracks: Track[]) => {
   });
 };
 
-const sort = (positions: Track[], type: keyof Track, direction: boolean) => {
+function sort<T>(positions: T[], type: keyof T, direction: boolean) {
   if (type === "change") direction = !direction;
 
   return [...positions].sort((a, b) => {
@@ -60,17 +70,20 @@ const sort = (positions: Track[], type: keyof Track, direction: boolean) => {
       return 0;
     }
 
+    // @ts-expect-error -- We know that the type is a number
     if (a[type] > b[type]) {
       return direction ? 1 : -1;
     }
+    // @ts-expect-error -- We know that the type is a number
+
     if (a[type] < b[type]) {
       return direction ? -1 : 1;
     }
     return 0;
   });
-};
+}
 
-const search = (positions: Track[], searchQuery: string) => {
+function search<T extends Track>(positions: T[], searchQuery: string) {
   const simplify = (text: string) =>
     text
       .toLowerCase() // Convert to lowercase
@@ -85,11 +98,12 @@ const search = (positions: Track[], searchQuery: string) => {
     const matchArtist = simplify(position.artist).includes(query);
     if (matchTitle || matchArtist) return matchTitle || matchArtist;
   });
-};
+}
 
 export const Top2000Handler = (): PositionContext => {
   const years = getYears(1999, new Date().getFullYear());
   const [positions, setPositions] = useState<Track[]>([]);
+  const [listType, setListType] = useState<"years" | "songs">("years");
 
   const [_selectedYear, setSelectedYear] = useQueryParam("year", StringParam);
   const selectedYear = _selectedYear ?? years[0];
@@ -97,17 +111,14 @@ export const Top2000Handler = (): PositionContext => {
   // fetch year
   const fetchAll = selectedYear === "all";
   const singleYearQuery = fetchAll ? skipToken : selectedYear;
-  const { data: singlePositionsResult, isFetching: isSinglePositionsLoading } =
+  const { data: positionsResult, isFetching: isPositionsLoading } =
     useGetYearQuery(singleYearQuery ?? skipToken);
 
   // fetch all
-  const allYearsQuery = fetchAll ? years : skipToken;
-  const { data: allPositionsResult, isFetching: isallPositionsLoading } =
-    useGetCombinedYearsQuery(allYearsQuery ?? skipToken);
-  const positionsResult = fetchAll ? allPositionsResult : singlePositionsResult;
-  const isPositionsLoading = fetchAll
-    ? isallPositionsLoading
-    : isSinglePositionsLoading;
+  const allYearsQuery = listType === "songs" ? years : skipToken;
+  const { data: songs, isFetching: isSongsLoading } = useGetSongsQuery(
+    allYearsQuery ?? skipToken
+  );
 
   // fetch compare year
   const [_compareYear, setCompareYear] = useQueryParam("previous", StringParam);
@@ -129,43 +140,61 @@ export const Top2000Handler = (): PositionContext => {
     }
   }, [comparePositionsResult, positionsResult]);
 
-  // sorting
+  // setup filters
   const [_sortDirection, setSortDirection] = useQueryParam(
     "direction",
     BooleanParam
   );
   const sortDirection = _sortDirection ?? true;
-
   const [_sortType, setSortType] = useQueryParam("position", StringParam);
   const sortType = _sortType ?? "position";
 
-  const sorted = sort(
+  const [_searchQuery, setSearchQuery] = useQueryParam("s", StringParam);
+  const searchQuery = _searchQuery ?? "";
+
+  // filter
+  const sortedPositions = sort<Track>(
     positions,
     sortType as keyof Track,
     sortDirection ?? true
   );
 
-  //searching
-  const [_searchQuery, setSearchQuery] = useQueryParam("s", StringParam);
-  const searchQuery = _searchQuery ?? "";
+  const sortedSongs = sort<EnhancedTrack>(
+    songs || [],
+    sortType as keyof EnhancedTrack,
+    sortDirection ?? true
+  );
 
-  const searched = search(sorted, searchQuery ?? "");
+  const searchedPositions = search(sortedPositions, searchQuery ?? "");
+  const searchedSongs = search(sortedSongs, searchQuery ?? "");
 
   //stats
-  const stats = {
+  const positionsStats = {
     averageChange:
       Math.floor(
-        searched.map((position) => position.change).reduce((a, b) => a + b, 0) /
-          searched.length
+        searchedPositions
+          .map((position) => position.change)
+          .reduce((a, b) => a + b, 0) / searchedPositions.length
       ) || 0,
-    amountOfSongs: searched.length || 0,
+    amountOfSongs: searchedPositions.length || 0,
+  };
+  const songsStats = {
+    averageChange:
+      Math.floor(
+        searchedPositions
+          .map((position) => position.change)
+          .reduce((a, b) => a + b, 0) / searchedPositions.length
+      ) || 0,
+    amountOfSongs: searchedPositions.length || 0,
   };
 
-  const all = {
-    positions: searched,
+  return {
+    positions: searchedPositions,
     setPositions,
     comparePositions,
     setComparePositions,
+    songs: searchedSongs,
+    isSongsLoading,
     years,
     selectedYear,
     setSelectedYear,
@@ -178,10 +207,11 @@ export const Top2000Handler = (): PositionContext => {
     sortDirection,
     searchQuery,
     setSearchQuery,
-    stats,
+    listType,
+    setListType,
+    positionsStats,
+    songsStats,
   };
-
-  return all;
 };
 
 const Context = createContext<PositionContext>({
@@ -201,7 +231,12 @@ const Context = createContext<PositionContext>({
   isLoading: false,
   searchQuery: "",
   setSearchQuery: () => {},
-  stats: {},
+  listType: "years",
+  setListType: () => {},
+  positionsStats: {},
+  songsStats: {},
+  songs: [],
+  isSongsLoading: false,
 });
 
 export const Top2000Provider = Context.Provider;

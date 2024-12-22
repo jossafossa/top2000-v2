@@ -1,18 +1,18 @@
-// import { ApiTrack, Track } from "../store";
-// import { getTrackId } from "./getTrackId";
+// import { ApiPosition, Position } from "../store";
+// import { getPositionId } from "./getPositionId";
 
-// type CompressedTrack = Track & {
+// type CompressedPosition = Position & {
 //   positions: Record<string, number>;
 // };
 
-// export function compressTracks(
-//   years: Record<string, ApiTrack[]>
-// ): CompressedTrack[] {
+// export function compressPositions(
+//   years: Record<string, ApiPosition[]>
+// ): CompressedPosition[] {
 //   const songMap = new Map();
 
 //   for (const [year, songs] of Object.entries(years)) {
 //     songs.forEach(({ position: { current }, ...track }) => {
-//       const key = getTrackId(track);
+//       const key = getPositionId(track);
 //       if (!songMap.has(key)) {
 //         songMap.set(key, { positions: {}, ...track });
 //       }
@@ -24,10 +24,10 @@
 //   return Array.from(songMap.values());
 // }
 
-// export function decompressTracks(
-//   songs: CompressedTrack[]
-// ): Record<string, ApiTrack[]> {
-//   const years: Record<string, Track[]> = {};
+// export function decompressPositions(
+//   songs: CompressedPosition[]
+// ): Record<string, ApiPosition[]> {
+//   const years: Record<string, Position[]> = {};
 
 //   songs.forEach(({ positions, ...track }) => {
 //     for (const [year, position] of Object.entries(positions)) {
