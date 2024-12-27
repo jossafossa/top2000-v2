@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { Top2000Api, Track, EnhancedTrack } from "./assets/Top2000Api";
+import { Top2000Api, Track, EnhancedTrack, Artist } from "@assets/Top2000Api";
 
 const API = new Top2000Api();
 
@@ -35,6 +35,9 @@ export const top2000 = createApi({
     getSongs: builder.query<EnhancedTrack[], string[]>({
       query: (years) => ({ endpoint: "getSongs", arg: years }),
     }),
+    getArtists: builder.query<Artist[], void>({
+      query: () => ({ endpoint: "getArtists", arg: undefined }),
+    }),
   }),
 });
 
@@ -48,4 +51,9 @@ export const store = configureStore({
 
 setupListeners(store.dispatch);
 
-export const { useGetYearQuery, useGetYearsQuery, useGetSongsQuery } = top2000;
+export const {
+  useGetYearQuery,
+  useGetYearsQuery,
+  useGetSongsQuery,
+  useGetArtistsQuery,
+} = top2000;

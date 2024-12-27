@@ -1,0 +1,17 @@
+@use "@css/mixins" as *;
+
+.select {
+  height: 24px;
+  padding-inline: 8px;
+  border-radius: 0.25rem;
+  background-color: var(--foreground);
+  border: 0;
+
+  @include breakpoint(sm) {
+    height: 32px;
+  }
+
+  @include focus {
+    @include focus-border;
+  }
+}

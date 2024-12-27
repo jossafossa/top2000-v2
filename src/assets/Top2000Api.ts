@@ -1,4 +1,4 @@
-import { getTrackId } from "../utils/getTrackId";
+import { useTrackId } from "@utils/useTrackId";
 
 export type Track = {
   id: string;
@@ -20,6 +20,11 @@ export type EnhancedTrack = MultiYearTrack & {
   totalChange: number;
   averageChange: number;
   changes: Record<string, number>;
+};
+
+export type Artist = {
+  name: string;
+  tracks: Track[];
 };
 
 export type ApiTrack = {
@@ -139,6 +144,10 @@ export class Top2000Api {
     return this.enhanceSongs(tracks);
   }
 
+  async getArtists() {
+    const songs = await this.getSongs(getYears(1999, new Date().getFullYear()));
+  }
+
   enhanceSongs(songs: MultiYearTrack[]): EnhancedTrack[] {
     return songs.map((song) => {
       // total change
@@ -214,7 +223,7 @@ export class Top2000Api {
       const coverURL =
         position.track?.coverUrl ??
         "https://www.nporadio2.nl/images/unknown_track_m.webp";
-      const id = getTrackId(position);
+      const id = useTrackId(position);
       return {
         artist: position.track.artist,
         title: position.track.title,

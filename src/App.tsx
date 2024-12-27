@@ -1,31 +1,42 @@
+import { YearsHandler, YearsProvider } from "@components/YearsContext";
 import styles from "./App.module.scss";
-import { Top2000Handler, Top2000Provider } from "./components/Context.tsx";
-import { Filters } from "./components/Filters.tsx";
-import { List } from "./components/List.tsx";
+import { Top2000Handler, Top2000Provider } from "@components/Top2000Context";
+import { Filters } from "@components/Filters/Filters.tsx";
+import { List } from "@components/List/List.tsx";
+import {
+  SongsHandler,
+  SongsProvider,
+} from "@components/SongsContext/SongsContext.ts";
 
 function App() {
   const top2000 = Top2000Handler();
+  const years = YearsHandler();
+  const songs = SongsHandler();
 
   const { selectedYear, positions } = top2000;
 
   const yearTitle = selectedYear === "all" ? "all years" : selectedYear;
 
   return (
-    <Top2000Provider value={top2000}>
-      <article className={styles.container}>
-        <header>
-          <h1>
-            Top {positions?.length} from {yearTitle}
-          </h1>
+    <YearsProvider value={years}>
+      <SongsProvider value={songs}>
+        <Top2000Provider value={top2000}>
+          <article className={styles.container}>
+            <header>
+              <h1>
+                Top {positions?.length} from {yearTitle}
+              </h1>
 
-          <Filters />
-        </header>
+              <Filters />
+            </header>
 
-        <section>
-          <List />
-        </section>
-      </article>
-    </Top2000Provider>
+            <section>
+              <List />
+            </section>
+          </article>
+        </Top2000Provider>
+      </SongsProvider>
+    </YearsProvider>
   );
 }
 

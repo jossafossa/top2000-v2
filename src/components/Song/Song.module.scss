@@ -1,0 +1,106 @@
+@use "@css/mixins" as *;
+
+.container {
+  --position-width: 32px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  @include breakpoint(sm) {
+    --position-width: 48px;
+  }
+}
+
+.position {
+  opacity: 0.5;
+  text-align: right;
+  font-size: 80%;
+  width: var(--position-width);
+
+  @include breakpoint(sm) {
+    font-size: 100%;
+  }
+}
+
+.track {
+  --background: var(--foreground);
+  --outer-height: 86px;
+  --gap: 8px;
+  --height: calc(var(--outer-height) - var(--gap));
+  --padding: 0.5rem;
+  --number-width: 35px;
+  --number-padding: 1rem;
+  --number-offset: calc(var(--number-width) + var(--number-padding));
+  --gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  height: var(--height);
+  padding: var(--padding);
+  background-color: var(--background);
+  border-radius: 0.75rem;
+  position: relative;
+  margin-bottom: 8px;
+  animation: 0.2s fadeIn ease forwards;
+  flex: 1;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @include breakpoint(sm) {
+    --gap: 1rem;
+  }
+
+  > header {
+    height: 100%;
+    display: flex;
+    align-items: Center;
+    gap: var(--gap);
+
+    > span {
+      opacity: 0.5;
+      width: 25px;
+      font-size: 80%;
+      display: flex;
+    }
+
+    > picture {
+      --size: calc(var(--height) - var(--padding) * 2);
+      width: var(--size);
+      height: var(--size);
+      object-fit: cover;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+  }
+
+  > section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    & h2 {
+      font-weight: bold;
+    }
+
+    & h3 {
+      font-size: 80%;
+      opacity: 0.7;
+    }
+  }
+
+  > footer {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+
+    padding-right: calc(var(--padding));
+  }
+}
