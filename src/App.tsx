@@ -7,34 +7,38 @@ import {
   SongsHandler,
   SongsProvider,
 } from "@components/SongsContext/SongsContext.ts";
+import { ArtistsHandler, ArtistsProvider } from "@components/ArtistsContext";
 
 function App() {
   const top2000 = Top2000Handler();
   const years = YearsHandler();
   const songs = SongsHandler();
+  const artists = ArtistsHandler();
 
-  const { selectedYear, positions } = top2000;
+  const { selectedYear, positions } = years;
 
   const yearTitle = selectedYear === "all" ? "all years" : selectedYear;
 
   return (
     <YearsProvider value={years}>
       <SongsProvider value={songs}>
-        <Top2000Provider value={top2000}>
-          <article className={styles.container}>
-            <header>
-              <h1>
-                Top {positions?.length} from {yearTitle}
-              </h1>
+        <ArtistsProvider value={artists}>
+          <Top2000Provider value={top2000}>
+            <article className={styles.container}>
+              <header>
+                <h1>
+                  Top {positions?.length} from {yearTitle}
+                </h1>
 
-              <Filters />
-            </header>
+                <Filters />
+              </header>
 
-            <section>
-              <List />
-            </section>
-          </article>
-        </Top2000Provider>
+              <section>
+                <List />
+              </section>
+            </article>
+          </Top2000Provider>
+        </ArtistsProvider>
       </SongsProvider>
     </YearsProvider>
   );

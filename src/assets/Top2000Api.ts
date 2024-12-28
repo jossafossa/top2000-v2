@@ -23,8 +23,10 @@ export type EnhancedTrack = MultiYearTrack & {
 };
 
 export type Artist = {
-  name: string;
+  artist: string;
   tracks: Track[];
+  amountOfSongs?: number;
+  image: string;
 };
 
 export type ApiTrack = {
@@ -145,7 +147,29 @@ export class Top2000Api {
   }
 
   async getArtists() {
-    const songs = await this.getSongs(getYears(1999, new Date().getFullYear()));
+    console.log("Fetching artists");
+    const songs = await this.getSongs(
+      getYears(1999, new Date().getFullYear()).map(String)
+    );
+    const artists = new Map<string, Artist>();
+
+    for (const song of songs) {
+      if (!artists.has(song.artist)) {
+        artists.set(song.artist, {
+          artist: song.artist,
+          tracks: [],
+          image: song.image,
+        });
+      }
+
+      artists.get(song.artist)?.tracks.push(song);
+    }
+
+    artists.forEach((artist) => {
+      artist.amountOfSongs = artist.tracks.length;
+    });
+
+    return Array.from(artists.values());
   }
 
   enhanceSongs(songs: MultiYearTrack[]): EnhancedTrack[] {

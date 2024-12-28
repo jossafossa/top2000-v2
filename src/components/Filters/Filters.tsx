@@ -11,7 +11,6 @@ import { useSongs } from "@components/SongsContext";
 
 export const Filters = () => {
   const {
-    positions,
     setSortType,
     sortType,
     setSortDirection,
@@ -20,6 +19,8 @@ export const Filters = () => {
     setListType,
     listType,
   } = useTop2000();
+
+  const { positions } = useYears();
 
   const setSort = (type: keyof Track, direction: boolean) => {
     setSortType(type);
@@ -99,6 +100,7 @@ export const Filters = () => {
         />
         {listType === "songs" && <SongsSorters />}
         {listType === "years" && <YearsSorters />}
+        {listType === "artists" && <ArtistsSorters />}
       </div>
     </>
   );
@@ -128,7 +130,7 @@ const SongsStats = () => {
 
 const YearFilters = () => {
   const { years, selectedYear, setCompareYear, compareYear, setSelectedYear } =
-    useTop2000();
+    useYears();
 
   return (
     <>
@@ -188,13 +190,13 @@ const SongsSorters = () => {
     <>
       <Sorter
         name="filter"
-        label="totalChange"
+        label="Total change"
         active={sortType === "totalChange"}
         onChange={(direction) => setSort("totalChange", direction)}
       />
       <Sorter
         name="filter"
-        label="averageChange"
+        label="Average change"
         active={sortType === "averageChange"}
         onChange={(direction) => setSort("averageChange", direction)}
       />
@@ -217,5 +219,25 @@ const YearsSorters = () => {
       active={sortType === "change"}
       onChange={(direction) => setSort("change", direction)}
     />
+  );
+};
+
+const ArtistsSorters = () => {
+  const { sortType, setSortType, setSortDirection } = useTop2000();
+
+  const setSort = (type: keyof Track, direction: boolean) => {
+    setSortType(type);
+    setSortDirection(direction);
+  };
+
+  return (
+    <>
+      <Sorter
+        name="amountOfSongs"
+        label="change"
+        active={sortType === "change"}
+        onChange={(direction) => setSort("change", direction)}
+      />
+    </>
   );
 };

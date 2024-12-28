@@ -11,7 +11,7 @@ import { useRelativePositions } from "@utils/useRelativePositions";
 export const YearsHandler = () => {
   const years = useYearsList(1999);
 
-  const [selectedYear] = useQueryParam("year", StringParam);
+  const [selectedYear, setSelectedYear] = useQueryParam("year", StringParam);
 
   // fetch year
   const singleYearQuery = selectedYear ?? years[0];
@@ -20,9 +20,11 @@ export const YearsHandler = () => {
   );
 
   // fetch compare year
-  const [compareYear] = useQueryParam("previous", StringParam);
+  const [compareYear, setCompareYear] = useQueryParam("previous", StringParam);
   const { data: compareResult, isFetching: isComparePositionsLoading } =
-    useGetYearQuery(compareYear ? compareYear : skipToken);
+    useGetYearQuery(
+      compareYear !== "previous" && compareYear ? compareYear : skipToken
+    );
   const [comparePositions] = useState<Track[]>([]);
 
   const positions = useRelativePositions(result ?? [], compareResult ?? []);
@@ -39,7 +41,7 @@ export const YearsHandler = () => {
   );
 
   const [searchQuery, setSearchQuery] = useQueryParam("s", StringParam);
-  const searched = useSearch(sorted, searchQuery ?? "");
+  const searched = useSearch(sorted, searchQuery ?? "", ["title", "artist"]);
 
   //stats
   const stats = {
@@ -53,10 +55,12 @@ export const YearsHandler = () => {
 
   return {
     positions: searched,
+    setSelectedYear,
     comparePositions,
+    setCompareYear,
     years,
-    selectedYear,
-    compareYear,
+    selectedYear: selectedYear as string,
+    compareYear: compareYear as string,
     isLoading: isPositionsLoading || isComparePositionsLoading,
     searchQuery,
     setSearchQuery,
@@ -66,7 +70,9 @@ export const YearsHandler = () => {
 
 const Context = createContext<ReturnType<typeof YearsHandler>>({
   positions: [],
+  setSelectedYear: () => {},
   comparePositions: [],
+  setCompareYear: () => {},
   years: [],
   selectedYear: "2024",
   compareYear: "2023",

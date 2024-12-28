@@ -1,11 +1,11 @@
 type Track = {
-  title: string;
   artist: string;
 };
 
 export function useSearch<T extends Track>(
   positions: T[],
-  searchQuery: string
+  searchQuery: string,
+  keys: (keyof T)[] = []
 ) {
   const simplify = (text: string) =>
     text
@@ -15,10 +15,15 @@ export function useSearch<T extends Track>(
       .replace(/[ø]/g, "o") // Replace special characters
       .replaceAll(/\s/g, ""); // remove whitespace
 
-  return positions.filter((position) => {
+  const filtered = positions.filter((position) => {
     const query = simplify(searchQuery);
-    const matchTitle = simplify(position.title).includes(query);
-    const matchArtist = simplify(position.artist).includes(query);
-    if (matchTitle || matchArtist) return matchTitle || matchArtist;
+
+    for (const key of keys) {
+      const match = simplify(String(position[key])).includes(query);
+      if (match) return true;
+    }
+    return false;
   });
+
+  return filtered;
 }

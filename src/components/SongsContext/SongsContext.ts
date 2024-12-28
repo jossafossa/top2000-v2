@@ -25,7 +25,10 @@ export const SongsHandler = () => {
     sortDirection ?? true
   );
 
-  const searchedSongs = useSearch(sortedSongs, searchQuery ?? "");
+  const searchedSongs = useSearch(sortedSongs, searchQuery ?? "", [
+    "title",
+    "artist",
+  ]);
 
   //stats
   const stats = {

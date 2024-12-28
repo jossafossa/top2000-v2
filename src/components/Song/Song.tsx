@@ -9,6 +9,10 @@ type SongProps = EnhancedTrack;
 export const Song = memo(function Song(props: SongProps) {
   const { title, artist, image, position } = props;
   const { sortType } = useTop2000();
+  const label = props[sortType];
+  let style = Number(label) > 0 ? "positive" : "negative";
+  style = label === 0 ? "neutral" : style;
+  const showLabel = !["position", "title", "artist"].includes(sortType);
 
   return (
     <div className={styles.container}>
@@ -28,8 +32,14 @@ export const Song = memo(function Song(props: SongProps) {
 
           <h3>{artist}</h3>
         </section>
-
-        <Label title={sortType}>{props[sortType]}</Label>
+        {showLabel && (
+          <Label
+            title={sortType}
+            style={style as "positive" | "negative" | "neutral"}
+          >
+            {String(label)}
+          </Label>
+        )}
       </article>
     </div>
   );
