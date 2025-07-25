@@ -6,13 +6,21 @@ import { useTop2000 } from "@components/Top2000Context";
 
 type SongProps = EnhancedTrack;
 
+const getLabel = (sortType: keyof EnhancedTrack) => {
+  if (sortType === "position") {
+    return "averagePosition";
+  }
+
+  return sortType;
+};
+
 export const Song = memo(function Song(props: SongProps) {
   const { title, artist, image, position } = props;
   const { sortType } = useTop2000();
-  const label = props[sortType];
+  const label = props[getLabel(sortType)];
   let style = Number(label) > 0 ? "positive" : "negative";
   style = label === 0 ? "neutral" : style;
-  const showLabel = !["position", "title", "artist"].includes(sortType);
+  const showLabel = !["title", "artist"].includes(sortType);
 
   return (
     <div className={styles.container}>

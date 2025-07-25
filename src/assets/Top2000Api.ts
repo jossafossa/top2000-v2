@@ -20,6 +20,7 @@ export type EnhancedTrack = MultiYearTrack & {
   totalChange: number;
   averageChange: number;
   changes: Record<string, number>;
+  averagePosition: number;
 };
 
 export type Artist = {
@@ -60,6 +61,15 @@ type ApiResponse = {
   };
   slug: string;
   positions: ApiTrack[];
+};
+
+const getCurrentYear = () => {
+  const today = new Date();
+
+  const isAfterChristmas = today.getMonth() === 11 && today.getDate() >= 14;
+
+  const offset = isAfterChristmas ? 0 : 1;
+  return today.getFullYear() - offset;
 };
 
 const getYears = (start: number, end: number) => {
@@ -132,16 +142,17 @@ export class Top2000Api {
 
     tracks = tracks.map((track) => {
       const positions = Object.values(track.positions);
-      track.position = Math.round(
-        positions.reduce((acc, cur) => acc + cur, 0) / positions.length
+      if (track.title === "Better Days") {
+        console.log({ positions });
+      }
+
+      track.position = Number(
+        (
+          positions.reduce((acc, cur) => acc + cur, 0) / positions.length
+        ).toFixed(2)
       );
       return track;
     });
-
-    for (const [index, track] of tracks.entries()) {
-      track.position = index + 1;
-      track.apiPrefPosition = track.position;
-    }
 
     return this.enhanceSongs(tracks);
   }
@@ -149,7 +160,7 @@ export class Top2000Api {
   async getArtists() {
     console.log("Fetching artists");
     const songs = await this.getSongs(
-      getYears(1999, new Date().getFullYear()).map(String)
+      getYears(1999, getCurrentYear()).map(String)
     );
     const artists = new Map<string, Artist>();
 
@@ -173,16 +184,21 @@ export class Top2000Api {
   }
 
   enhanceSongs(songs: MultiYearTrack[]): EnhancedTrack[] {
-    return songs.map((song) => {
+    songs.sort((a, b) => a.position - b.position);
+
+    return songs.map((song, index) => {
       // total change
       const changes: Record<string, number> = {};
-      const years = getYears(1999, new Date().getFullYear());
+      const years = getYears(1999, getCurrentYear());
 
       for (const year of years) {
         const previous = song.previousPositions[year] || 2000;
         const current = song.positions[year] || 2000;
         changes[year] = previous - current;
       }
+
+      const averagePosition = song.position;
+      song.position = index + 1;
 
       const totalChange = Object.values(changes).reduce(
         (acc, cur) => acc + Math.abs(cur),
@@ -198,6 +214,7 @@ export class Top2000Api {
         totalChange,
         averageChange,
         changes,
+        averagePosition,
       };
     });
   }
