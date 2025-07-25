@@ -1,10 +1,12 @@
-export const useYearsList = (
-  start: number,
-  end: number | undefined = undefined
-) => {
-  end = end || new Date().getFullYear();
+export const useYearsList = (start: number) => {
+  const today = new Date();
 
-  return Array.from({ length: end - start + 1 }, (_, index) =>
-    String(start + index)
+  const isAfterChristmas = today.getMonth() === 11 && today.getDate() >= 14;
+
+  const offset = isAfterChristmas ? 0 : 1;
+
+  return Array.from(
+    { length: today.getFullYear() - offset - start + 1 },
+    (_, index) => String(start + index)
   ).reverse();
 };
